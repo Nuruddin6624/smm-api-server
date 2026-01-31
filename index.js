@@ -1,44 +1,51 @@
 const express = require('express');
 const axios = require('axios');
 const app = express();
+const PORT = process.env.PORT || 3000;
+
+// 🔐 নিরাপদভাবে .env থেকে API key নেয়
+const smmsunAPIKey = process.env.SMM_API;
+
 app.use(express.json());
 
-const smmsunAPIKey = "10cc6955ab1767e42922f945e529f981";
-
-const serviceMap = {
-  "101": 4567,
-  "102": 8910
-};
+app.get('/', (req, res) => {
+  res.send('🟢 SMM API server is live!');
+});
 
 app.post('/place-order', async (req, res) => {
   const { service_id, link, quantity } = req.body;
 
-  const smmsunServiceId = serviceMap[service_id];
-  if (!smmsunServiceId) {
-    return res.status(400).json({ success: false, message: "Invalid service_id" });
-  }
-
   try {
-    const response = await axios.post("https://smmsun.com/api/v2", {
+    const response = await axios.post('https://smmsun.com/api/v2', {
       key: smmsunAPIKey,
-      action: "add",
-      service: smmsunServiceId,
-      link,
-      quantity
+      action: 'add',
+      service: service_id,
+      link: link,
+      quantity: quantity
     });
 
-    return res.json({
-      success: true,
-      order: response.data.order
-    });
-  } catch (err) {
-    return res.status(500).json({
+    res.json(response.data);
+  } catch (error) {
+    console.error(error.response?.data || error.message);
+    res.status(500).json({
       success: false,
-      error: err.response?.data || err.message
+      error: error.response?.data || 'Server Error'
     });
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
+app.get('/services', async (req, res) => {
+  try {
+    const response = await axios.post('https://smmsun.com/api/v2', {
+      key: smmsunAPIKey,
+      action: 'services'
+    });
 
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json({ error: error.response?.data || 'Error fetching services' });
+  }
+});
