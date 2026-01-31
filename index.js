@@ -3,7 +3,7 @@ const axios = require('axios');
 const app = express();
 app.use(express.json());
 
-const smmsunAPIKey = "29829e0b5b22fd12ebbcfeeﬀ3e9f282";
+const smmsunAPIKey = "10cc6955ab1767e42922f945e529f981";
 
 const serviceMap = {
   "101": 4567,
@@ -41,3 +41,4 @@ app.post('/place-order', async (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
